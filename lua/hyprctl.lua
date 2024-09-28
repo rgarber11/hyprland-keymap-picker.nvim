@@ -1,8 +1,8 @@
 local async = require "plenary.async"
 -- This is a little silly, but in future projects, this will be helpful
---- Hyprctl wrapper for lua. Will error on XDG_RUNTIME_DIR or HYPRLAND_INSTANCE_SIGNATURE not being set.
+--- Hyprctl wrapper for lua. Will error on XDG_RUNTIME_DIR or HYPRLAND_INSTANCE_SIGNATURE not being set. This is an async function made with plenary.async, and must be run qs such.
 --- @param cmd string # Command For Hyprctl to run
---- @param callback function # Command For Hyprctl to run
+--- @return string | table # Commands with the j option will return a lua table. Otherwise will return json
 local function hyprctl(cmd)
     local tx, rx = async.control.channel.oneshot()
     local returnJSON = false
