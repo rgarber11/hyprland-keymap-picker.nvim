@@ -7,7 +7,7 @@ local function hyprctl(cmd)
     local tx, rx = async.control.channel.oneshot()
     local returnJSON = false
     local opts = cmd:find "/"
-    if opts ~= nil and cmd:sub(0, opts):find "j" ~= nil then
+    if opts ~= nil and cmd:sub(1, opts):find "j" ~= nil then
         returnJSON = true
     end
     local runtime_dir = assert(os.getenv "XDG_RUNTIME_DIR", "XDG_RUNTIME_DIR is not set.")
