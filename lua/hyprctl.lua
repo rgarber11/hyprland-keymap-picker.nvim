@@ -13,7 +13,7 @@ local function hyprctl(cmd)
     local runtime_dir = assert(os.getenv "XDG_RUNTIME_DIR", "XDG_RUNTIME_DIR is not set.")
     local hypr_instance = assert(os.getenv "HYPRLAND_INSTANCE_SIGNATURE", "HYPRLAND_INSTANCE_SIGNATURE is not set")
     local socket_path = runtime_dir .. "/hypr/" .. hypr_instance .. "/.socket.sock"
-    local socket = vim.uv.new_pipe(true)
+    local socket = vim.uv.new_pipe(false)
     local buffer = require("string.buffer").new()
     local err = async.uv.pipe_connect(socket, vim.fn.resolve(socket_path))
     assert(not err, err)
