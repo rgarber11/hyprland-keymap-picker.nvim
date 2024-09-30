@@ -24,7 +24,7 @@ WIP Plugin to automatically change layouts when switching to and from insert mod
 
 ```lua
 require("hyprland-keymap-picker").setup({
-    default_layout = 0, -- Default Layout in Hyprland Will Be default (Default: 0)
+    default_layout = 1, -- Default Layout in Hyprland Will Be default (Default: 1)
     cache_devices = false, -- Call hyprctl devices every change, or cache keyboards (Default: false)
     cache_layouts = true, -- Check if there are new layouts, or only ask once (Note: This significantly slows things down) (Default: false)
     layouts = { -- Custom set layouts, rather than loading hyprland config. Note that the ordering relative to the config stil matters (not zero indexed here). (Default: Hyprland Config)
@@ -62,11 +62,12 @@ require("hyprland-keymap-picker").set_default(keymap)
 | Command                | Description                                                                                                |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `HyprlandSetKeyMap`    | Sets the insert-mode language via a `vim.ui.select` toolbox.                                               |
-| `HyprlandKeyMapReset`  | Turns off insert-mode keymap changing                                                                      |
-| `HyprladDefaultKeymap` | Temporarily change normal and visual-mode keymap via a `vim.ui.select` toolbox. Selection does not persist |
+| `HyprlandResetKeyMap`  | Turns off insert-mode keymap changing                                                                      |
+| `HyprladDefaultKeyMap` | Temporarily change normal and visual-mode keymap via a `vim.ui.select` toolbox. Selection does not persist |
 
 ## TODO
 
 1. Actually create the top-level module/interface
 2. Performance tuning. Should the `setup({})` call be blocking or non-blocking?
 3. Testing suite + general setup to be more in-line with other Neovim plugins.
+4. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named. 
