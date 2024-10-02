@@ -22,7 +22,7 @@ WIP Plugin to automatically change layouts when switching to and from insert mod
 
 ### Setup
 
-```lua
+````lua
 require("hyprland-keymap-picker").setup({
     default_layout = 1, -- Default Layout in Hyprland Will Be default (Default: 1)
     cache_devices = false, -- Call hyprctl devices every change, or cache keyboards (Default: false)
@@ -31,6 +31,10 @@ require("hyprland-keymap-picker").setup({
         [1] = "English (US)",
         [3] = "Russian (phonetic)",
     },
+    keyboards = { -- Custom set keyboards, rather than calling "hyprctl devices". Note that the first keyboard is assumed to be the main board.
+        "at-translated-set-2-keyboard",
+        "other-keyboard"
+    }
     on_change = function(new_lang) -- callback for when the language is changed. (Default: nil)
         local Job = require "plenary.job"
         Job:new({ -- Let external tools know the language has changed
@@ -45,17 +49,18 @@ require("hyprland-keymap-picker").setup({
     on_exit = nil, -- callback for exiting insert mode (Default: nil)
     end,
 })
+    ```
+### Lua Functions
+```lua
 --- Set insert-mode keymap programmatically
---- @param keymap int | string 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices)
+--- @param keymap int | string | nil 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices). If nil, then a selection menu will be used.
 require("hyprland-keymap-picker").set_keymap(keymap)
 --- Resets insert-mode keymap functionality.
 require("hyprland-keymap-picker").reset()
 --- Set normal-mode keymap programmatically (Note: these do not persist nvim instances. For that, change setup call)
---- @param keymap int | string 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices)
+--- @param keymap int | string | nil 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices). If nil then a selection menu will be used
 require("hyprland-keymap-picker").set_default(keymap)
-
-
-```
+````
 
 ### Commands
 
@@ -70,4 +75,4 @@ require("hyprland-keymap-picker").set_default(keymap)
 1. Actually create the top-level module/interface
 2. Performance tuning. Should the `setup({})` call be blocking or non-blocking?
 3. Testing suite + general setup to be more in-line with other Neovim plugins.
-4. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named. 
+4. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named.
