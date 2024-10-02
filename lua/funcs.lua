@@ -28,9 +28,12 @@ local function get_keyboards()
 end
 --- @async
 --- Async Function Which Returns Keyboard Layout
+---@param keyboards Keyboard[]? Array of Keyboards to be tested. Otherwise array of keyboards to be changed
 ---@return string name Name of Current Layout
-function M.get_current_layout()
-    local keyboards = get_keyboards()
+function M.get_current_layout(keyboards)
+    if keyboards == nil then
+        keyboards = get_keyboards()
+    end
     for _, k in ipairs(keyboards) do
         if k.main then
             return k["active_keymap"]
@@ -46,9 +49,12 @@ end
 --- @async
 --- Changes Layout To a Given Layout. Does multiple hyprctl calls as 'switchxkblayout all' is broken on my machine.
 --- @param layout integer? Number of Layout in ordering in hyprland config file. (0-indexed)
-function M.change_layout(layout)
+---@param keyboards Keyboard[]? Array of Keyboards to be tested. Otherwise array of keyboards to be changed
+function M.change_layout(layout, keyboards)
     layout = layout or 0
-    local keyboards = get_keyboards()
+    if keyboards == nil then
+        keyboards = get_keyboards()
+    end
     local main = nil
     for _, k in ipairs(keyboards) do
         if not k.main then
