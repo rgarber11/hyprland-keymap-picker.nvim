@@ -21,7 +21,7 @@ end
 --- @async
 --- Asynchronously return all keyboards. Errors if none found
 --- @return Keyboard[] keyboards All Keyboards defined by Hyprland
-local function get_keyboards()
+function M.get_keyboards()
     local devices = hyprctl "j/devices"
     assert(devices["keyboards"], "No keyboards found")
     return devices["keyboards"]
@@ -32,7 +32,7 @@ end
 ---@return string name Name of Current Layout
 function M.get_current_layout(keyboards)
     if keyboards == nil then
-        keyboards = get_keyboards()
+        keyboards = M.get_keyboards()
     end
     for _, k in ipairs(keyboards) do
         if k.main then

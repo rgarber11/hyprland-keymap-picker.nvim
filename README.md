@@ -35,7 +35,7 @@ require("hyprland-keymap-picker").setup({
         "at-translated-set-2-keyboard",
         "other-keyboard"
     }
-    on_change = function(new_lang) -- callback for when the language is changed. (Default: nil)
+    on_change = function(new_keymap) -- callback for when the language is changed. (Default: nil)
         local Job = require "plenary.job"
         Job:new({ -- Let external tools know the language has changed
             command = "pkill",
