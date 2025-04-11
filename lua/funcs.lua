@@ -75,24 +75,17 @@ local function get_layout_description(layout, variant)
     local ans = nil
     if variant == nil or variant == "" then
         ans = Job:new({
-            command = "bash",
-            args = { "-c", [[sed -n '/\s\s]] .. layout .. [[\s*/s/\s\s]] .. layout .. [[\s*//p' /usr/share/X11/xkb/rules/evdev.lst | grep '^[^:]*$']] },
+            command = "sed",
+            args = { "-nE", [['/^\s\s]] .. layout .. [[/ {s/^\s\s]] .. layout .. [[\s*(.*)$/\1/p;q}']], "/usr/share/X11/xkb/rules/evdev.lst" },
             enable_recording = true,
         })
     else
         ans = Job:new({
-            command = "bash",
+            command = "sed",
             args = {
-                "-c",
-                [[sed -n '/\s\s]]
-                    .. variant
-                    .. [[\s*]]
-                    .. layout
-                    .. [[:\s/s/\s\s]]
-                    .. variant
-                    .. [[\s*]]
-                    .. layout
-                    .. [[:\s//p' /usr/share/X11/xkb/rules/evdev.lst]],
+                "-n",
+                [['/\s\s]] .. variant .. [[\s*]] .. layout .. [[:\s/s/\s\s]] .. variant .. [[\s*]] .. layout .. [[:\s//p']],
+                "/usr/share/X11/xkb/rules/evdev.lst",
             },
             enable_recording = true,
         })
