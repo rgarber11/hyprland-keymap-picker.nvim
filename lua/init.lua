@@ -73,6 +73,15 @@ function M.setup(opts)
             setting_up_devices:send()
         end)
     end
+    vim.api.nvim_create_user_command("HyprlandSetKeymap", function()
+        M.set_default()
+    end, { desc = "Set insert-mode language" })
+    vim.api.nvim_create_user_command("HyprlandResetKeymap", function()
+        M.reset()
+    end, { desc = "Set insert-mode language" })
+    vim.api.nvim_create_user_command("HyprlandDefaultKeymap", function()
+        M.set_default()
+    end, { desc = "Set insert-mode language" })
 end
 --- Return zero-indexed keymap for given input.
 ---@param keymap integer|string|nil
@@ -131,7 +140,13 @@ function M.set_keymap(keymap)
         group = autocmd_id,
         desc = "Hyprland-Lang-Picker Changing language in InsertMode",
         pattern = "*",
-        callback = function(ev)
+        callback = function(_)
+            if saved_opts.on_enter then
+                saved_opts.on_enter(saved_opts.layouts[zero_idx_keymap + 1])
+            end
+            if saved_opts.on_change then
+                saved_opts.on_change(saved_opts.layouts[zero_idx_keymap + 1])
+            end
             async.run(function()
                 funcs.change_layout(zero_idx_keymap, saved_opts.keyboards)
             end)
@@ -142,6 +157,12 @@ function M.set_keymap(keymap)
         desc = "Hyprland-Lang-Picker Changing language back to default when leaving insert mode",
         pattern = "*",
         callback = function(_)
+            if saved_opts.on_exit then
+                saved_opts.on_exit(saved_opts.layouts[changed_default_zero_indexed + 1])
+            end
+            if saved_opts.on_change then
+                saved_opts.on_change(saved_opts.layouts[changed_default_zero_indexed + 1])
+            end
             if changed_default_zero_indexed ~= nil then
                 async.run(function()
                     funcs.change_layout(changed_default_zero_indexed, saved_opts.keyboards)
