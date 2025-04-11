@@ -1,6 +1,6 @@
 local async = require "plenary.async"
 -- This is a little silly, but in future projects, this will be helpful
---- async
+--- @async
 --- Hyprctl wrapper for lua. Will error on XDG_RUNTIME_DIR or HYPRLAND_INSTANCE_SIGNATURE not being set. This is an async function made with plenary.async, and must be run qs such.
 --- @param cmd string # Command For Hyprctl to run
 --- @return string | table # Commands with the j (json) option will return a lua table. Otherwise will return a string
