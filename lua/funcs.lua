@@ -53,7 +53,7 @@ end
 function M.change_layout(layout, keyboards)
     layout = layout or 0
     if keyboards == nil then
-        keyboards = get_keyboards()
+        keyboards = M.get_keyboards()
     end
     local main = nil
     for _, k in ipairs(keyboards) do
