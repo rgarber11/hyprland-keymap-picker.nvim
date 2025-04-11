@@ -64,11 +64,11 @@ require("hyprland-keymap-picker").set_default(keymap)
 
 ### Commands
 
-| Command                | Description                                                                                                |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `HyprlandSetKeyMap`    | Sets the insert-mode language via a `vim.ui.select` toolbox.                                               |
-| `HyprlandResetKeyMap`  | Turns off insert-mode keymap changing                                                                      |
-| `HyprladDefaultKeyMap` | Temporarily change normal and visual-mode keymap via a `vim.ui.select` toolbox. Selection does not persist |
+| Command                 | Description                                                                                                |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `HyprlandSetKeymap`     | Sets the insert-mode language via a `vim.ui.select` toolbox.                                               |
+| `HyprlandResetKeymap`   | Turns off insert-mode keymap changing                                                                      |
+| `HyprlandDefaultKeymap` | Temporarily change normal and visual-mode keymap via a `vim.ui.select` toolbox. Selection does not persist |
 
 ## TODO
 
