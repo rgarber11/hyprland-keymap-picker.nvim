@@ -14,12 +14,10 @@ local M = {}
 --- @field main boolean
 --- Synchronous call to switch to default keymap Note: 'switchxkblayout all' only works for the default keymap on my machine
 --- @class Layouts
---- @field named string
---- @field [string] string
+--- @field [string] string Associative field between layout name and layout description
 local saved_layouts = nil
 --- @class Variants
---- @field named string
---- @field [string] string
+--- @field [string] {[string]: string} Associative field between "layoutname|variantname" and variant description
 local saved_variants = nil
 function M.to_default()
     async.void(function()
@@ -88,8 +86,8 @@ local parse_states = {
 ---@return string description X11 description given in evdev.lst for the given xkbmap.
 local function get_layout_description(layout, variant)
     if saved_layouts == nil then
-        saved_layouts = { named = "Layouts" }
-        saved_variants = { named = "Variants" }
+        saved_layouts = {}
+        saved_variants = {}
         local state = parse_states.pre_layout
         for line in io.lines "/usr/share/X11/xkb/rules/evdev.lst" do
             if state == parse_states.pre_layout then
@@ -112,7 +110,10 @@ local function get_layout_description(layout, variant)
                     goto continue
                 else
                     local variant_name, layout_name, variant_desc = string.match(line, "^%s*(%S+)%s+(%l+):%s+(.+)$")
-                    saved_variants[layout_name .. "|" .. variant_name] = variant_desc
+                    if saved_variants[layout_name] == nil then
+                        saved_variants[layout_name] = {}
+                    end
+                    saved_variants[layout_name][variant_name] = variant_desc
                 end
             else
                 break
@@ -123,7 +124,7 @@ local function get_layout_description(layout, variant)
     if variant == nil then
         return saved_layouts[layout]
     else
-        return saved_variants[layout .. "|" .. variant]
+        return saved_variants[layout][variant]
     end
 end
 --- @async
