@@ -12,13 +12,13 @@ local M = {}
 --- @field options string
 --- @field active_keymap string
 --- @field main boolean
---- Synchronous call to switch to default keymap Note: 'switchxkblayout all' only works for the default keymap on my machine
 --- @class Layouts
 --- @field [string] string Associative field between layout name and layout description
 local saved_layouts = nil
 --- @class Variants
 --- @field [string] {[string]: string} Associative field between "layoutname|variantname" and variant description
 local saved_variants = nil
+--- Synchronous call to switch to default keymap Note: 'switchxkblayout all' only works for the default keymap on my machine
 function M.to_default()
     async.void(function()
         hyprctl "switchxkblayout all 0"
