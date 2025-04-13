@@ -13,6 +13,14 @@ local M = {}
 --- @field active_keymap string
 --- @field main boolean
 --- Synchronous call to switch to default keymap Note: 'switchxkblayout all' only works for the default keymap on my machine
+--- @class Layouts
+--- @field named string
+--- @field [string] string
+local saved_layouts = nil
+--- @class Variants
+--- @field named string
+--- @field [string] string
+local saved_variants = nil
 function M.to_default()
     async.void(function()
         hyprctl "switchxkblayout all 0"
@@ -67,30 +75,56 @@ function M.change_layout(layout, keyboards)
         hyprctl("switchxkblayout " .. main .. " " .. layout)
     end
 end
---- Returns Human-readable name for given XKB Layout/Variant combination. Currently syncs, join doesn't work for me.
+---@enum parse_states
+local parse_states = {
+    pre_layout = 1,
+    layout = 2,
+    variants = 3,
+    done = 4,
+}
+--- Returns Human-readable name for given XKB Layout/Variant combination.
 ---@param layout string Xkb Layout
 ---@param variant string? Variant for given xkblayout
 ---@return string description X11 description given in evdev.lst for the given xkbmap.
 local function get_layout_description(layout, variant)
-    local ans = nil
-    if variant == nil or variant == "" then
-        ans = Job:new({
-            command = "sed",
-            args = { "-nE", [['/^\s\s]] .. layout .. [[/ {s/^\s\s]] .. layout .. [[\s*(.*)$/\1/p;q}']], "/usr/share/X11/xkb/rules/evdev.lst" },
-            enable_recording = true,
-        })
-    else
-        ans = Job:new({
-            command = "sed",
-            args = {
-                "-n",
-                [['/\s\s]] .. variant .. [[\s*]] .. layout .. [[:\s/s/\s\s]] .. variant .. [[\s*]] .. layout .. [[:\s//p']],
-                "/usr/share/X11/xkb/rules/evdev.lst",
-            },
-            enable_recording = true,
-        })
+    if saved_layouts == nil then
+        saved_layouts = { named = "Layouts" }
+        saved_variants = { named = "Variants" }
+        local state = parse_states.pre_layout
+        for line in io.lines "/usr/share/X11/xkb/rules/evdev.lst" do
+            if state == parse_states.pre_layout then
+                if string.find(line, "! layout") then
+                    state = parse_states.layout
+                end
+            elseif state == parse_states.layout then
+                if string.find(line, "! variant") then
+                    state = parse_states.variants
+                elseif string.find(line, "^%s*$") then
+                    goto continue
+                else
+                    local layout_name, layout_desc = string.match(line, "^%s*(%l+)%s+(.+)$")
+                    saved_layouts[layout_name] = layout_desc
+                end
+            elseif state == parse_states.variants then
+                if string.find(line, "! option") then
+                    state = parse_states.done
+                elseif string.find(line, "^%s*$") then
+                    goto continue
+                else
+                    local variant_name, layout_name, variant_desc = string.match(line, "^%s*(%S+)%s+(%l+):%s+(.+)$")
+                    saved_variants[layout_name .. "|" .. variant_name] = variant_desc
+                end
+            else
+                break
+            end
+            ::continue::
+        end
     end
-    return ans:sync()[1]
+    if variant == nil then
+        return saved_layouts[layout]
+    else
+        return saved_variants[layout .. "|" .. variant]
+    end
 end
 --- @async
 --- Get Human Readable descriptions for all Hyprland Keyboard Layouts.
