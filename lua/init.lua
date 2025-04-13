@@ -21,15 +21,15 @@ function M.setup(opts)
     if opts == nil then
         opts = {}
     end
-    if opts.default_layout ~= nil then
+    if opts.default_layout == nil then
         opts.default_layout = 1
     end
     saved_opts.default_layout = opts.default_layout
-    if opts.cache_devices ~= nil then
+    if opts.cache_devices == nil then
         opts.cache_devices = true
     end
     saved_opts.cache_devices = opts.cache_devices
-    if opts.cache_layouts ~= nil then
+    if opts.cache_layouts == nil then
         opts.cache_layouts = true
     end
     saved_opts.cache_devices = opts.cache_layouts
@@ -59,7 +59,7 @@ function M.setup(opts)
         table.insert(keyboards, { ["main"] = true, ["name"] = opts.keyboards[1] })
         for i, v in ipairs(opts.keyboards) do
             if i ~= 1 then
-                table(keyboards, { ["main"] = false, ["name"] = opts.keyboards[i] })
+                table(keyboards, { ["main"] = false, ["name"] = v })
             end
         end
         saved_opts.cache_devices = true
@@ -75,13 +75,16 @@ function M.setup(opts)
     end
     vim.api.nvim_create_user_command("HyprlandSetKeymap", function()
         M.set_default()
-    end, { desc = "Set insert-mode language" })
+    end, { desc = "Set insert-mode language, and enable changing keymaps on entering and exiting insert mode" })
     vim.api.nvim_create_user_command("HyprlandResetKeymap", function()
         M.reset()
-    end, { desc = "Set insert-mode language" })
+    end, { desc = "Turn off keymap changing when entering insert mode" })
     vim.api.nvim_create_user_command("HyprlandDefaultKeymap", function()
         M.set_default()
-    end, { desc = "Set insert-mode language" })
+    end, { desc = "Change default keymap when exiting insert mode" })
+    vim.api.nvim_create_user_command("HyprlandReloadLayouts", function()
+        M.reload_layouts()
+    end, { desc = "Reload Cached Layouts with new layouts" })
 end
 --- Return zero-indexed keymap for given input.
 ---@param keymap integer|string|nil
@@ -200,5 +203,17 @@ end
 ---@param keymap integer | string | nil Value of Keymap to use. If integer, then select from 1-indexed array of layouts. If string, use said layout string. If nil, then it will use vim.ui.select
 function M.set_default(keymap)
     changed_default_zero_indexed = get_keymap_id(keymap, "Set Temporary Other Default")
+end
+--- Reload layouts without changing cache_status (This function works if layouts aren't cached, but only makes sense if they are)
+function M.reload_layouts()
+    setting_up_layouts:recv()
+    async.run(function()
+        saved_opts.layouts = funcs:get_layouts()
+    end)
+    if saved_opts.cache_layouts then
+        async.run(function()
+            setting_up_layouts:send()
+        end)
+    end
 end
 return M

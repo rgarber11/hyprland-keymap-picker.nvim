@@ -22,7 +22,7 @@ WIP Plugin to automatically change layouts when switching to and from insert mod
 
 ### Setup
 
-````lua
+```lua
 require("hyprland-keymap-picker").setup({
     default_layout = 1, -- Default Layout in Hyprland Will Be default (Default: 1)
     cache_devices = false, -- Call hyprctl devices every change, or cache keyboards (Default: false)
@@ -49,7 +49,7 @@ require("hyprland-keymap-picker").setup({
     on_exit = nil, -- callback for exiting insert mode (Default: nil)
     end,
 })
-    ```
+```
 ### Lua Functions
 ```lua
 --- Set insert-mode keymap programmatically
@@ -60,7 +60,9 @@ require("hyprland-keymap-picker").reset()
 --- Set normal-mode keymap programmatically (Note: these do not persist nvim instances. For that, change setup call)
 --- @param keymap int | string | nil 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices). If nil then a selection menu will be used
 require("hyprland-keymap-picker").set_default(keymap)
-````
+--- Reload layouts without changing cache_status (This function works if layouts aren't cached, but only makes sense if they are)
+require("hyprland-keymap-picker").reload_layouts()
+```
 
 ### Commands
 
@@ -69,6 +71,7 @@ require("hyprland-keymap-picker").set_default(keymap)
 | `HyprlandSetKeymap`     | Sets the insert-mode language via a `vim.ui.select` toolbox.                                               |
 | `HyprlandResetKeymap`   | Turns off insert-mode keymap changing                                                                      |
 | `HyprlandDefaultKeymap` | Temporarily change normal and visual-mode keymap via a `vim.ui.select` toolbox. Selection does not persist |
+| `HyprlandReloadLayouts` | Reload cached layouts at runtime, using hyprctl                                                            |
 
 ## TODO
 
