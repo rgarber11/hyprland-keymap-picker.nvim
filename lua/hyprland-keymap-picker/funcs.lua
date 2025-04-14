@@ -145,17 +145,12 @@ function M.get_layouts()
     for str in string.gmatch(variantStr, "([^,]*)") do
         table.insert(variants, str)
     end
-    local tx, rx = async.control.channel.oneshot()
-    async.util.scheduler(function()
-        local descriptions = {}
-        for i, layout in ipairs(layouts) do
-            if layout ~= "" then
-                table.insert(descriptions, get_layout_description(layout, variants[i]))
-            end
+    local descriptions = {}
+    for i, layout in ipairs(layouts) do
+        if layout ~= "" then
+            table.insert(descriptions, get_layout_description(layout, variants[i]))
         end
-        tx(descriptions)
-    end)
-    local ans = rx()
-    return ans
+    end
+    return descriptions
 end
 return M
