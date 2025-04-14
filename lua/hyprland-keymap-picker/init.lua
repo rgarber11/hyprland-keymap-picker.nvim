@@ -74,7 +74,7 @@ function M.setup(opts)
         end)
     end
     vim.api.nvim_create_user_command("HyprlandSetKeymap", function()
-        M.set_default()
+        M.set_keymap()
     end, { desc = "Set insert-mode language, and enable changing keymaps on entering and exiting insert mode" })
     vim.api.nvim_create_user_command("HyprlandResetKeymap", function()
         M.reset()
