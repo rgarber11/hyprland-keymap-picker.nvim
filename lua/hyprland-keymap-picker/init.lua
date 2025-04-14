@@ -91,21 +91,26 @@ end
 ---@param prompt string
 ---@return integer
 local function get_keymap_id(keymap, prompt)
-    local zero_idx_keymap = -1
-    if type(keymap) == "number" then
-        zero_idx_keymap = keymap - 1
-    elseif type(keymap) == "string" then
-        for i, layout_name in ipairs(saved_opts.layouts) do
-            if layout_name == keymap then
-                zero_idx_keymap = i - 1
+    local tx, rx = async.control.channel.oneshot()
+    async.run(function()
+        if type(keymap) == "number" then
+            tx(keymap - 1)
+        elseif type(keymap) == "string" then
+            for i, layout_name in ipairs(saved_opts.layouts) do
+                if layout_name == keymap then
+                    tx(i - 1)
+                end
             end
+        else
+            vim.ui.select(saved_opts.layouts, { prompt = prompt, kind = "idx" }, function(_, idx)
+                if idx == -1 then
+                    tx(-1)
+                end
+                tx(idx - 1)
+            end)
         end
-    else
-        vim.ui.select(saved_opts.layouts, { prompt = prompt, kind = "idx" }, function(_, idx)
-            zero_idx_keymap = idx - 1
-        end)
-    end
-    return zero_idx_keymap
+    end)
+    return rx
 end
 --- Set insert mode keymap
 ---@param keymap integer | string | nil Value of Keymap to use. If integer, then select from 1-indexed array of layouts. If string, use said layout string. If nil, then it will use vim.ui.select
@@ -124,63 +129,64 @@ function M.set_keymap(keymap)
         end)
     end
     done_setup_devices.recv()
-    local zero_idx_keymap = get_keymap_id(keymap, "Pick the Insert-Mode Keymap")
-    if type(keymap) == "number" then
-        zero_idx_keymap = keymap - 1
-    elseif type(keymap) == "string" then
-        for i, layout_name in ipairs(saved_opts.layouts) do
-            if layout_name == keymap then
-                zero_idx_keymap = i - 1
-            end
+    local keymap_awaitable = get_keymap_id(keymap, "Pick the Insert-Mode Keymap")
+    async.run(function()
+        local zero_idx_keymap = keymap_awaitable()
+        if zero_idx_keymap == -1 then
+            return
         end
-    else
-        vim.ui.select(saved_opts.layouts, { prompt = "Pick the Insert-Mode Keymap", kind = "idx" }, function(_, idx)
-            zero_idx_keymap = idx - 1
-        end)
-    end
-    autocmd_id = vim.api.nvim_create_augroup("LangPicker", {})
-    vim.api.nvim_create_autocmd({ "InsertEnter" }, {
-        group = autocmd_id,
-        desc = "Hyprland-Lang-Picker Changing language in InsertMode",
-        pattern = "*",
-        callback = function(_)
-            if saved_opts.on_enter then
-                saved_opts.on_enter(saved_opts.layouts[zero_idx_keymap + 1])
-            end
-            if saved_opts.on_change then
-                saved_opts.on_change(saved_opts.layouts[zero_idx_keymap + 1])
-            end
-            async.run(function()
-                funcs.change_layout(zero_idx_keymap, saved_opts.keyboards)
-            end)
-        end,
-    })
-    vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-        group = autocmd_id,
-        desc = "Hyprland-Lang-Picker Changing language back to default when leaving insert mode",
-        pattern = "*",
-        callback = function(_)
-            if saved_opts.on_exit then
-                saved_opts.on_exit(saved_opts.layouts[changed_default_zero_indexed + 1])
-            end
-            if saved_opts.on_change then
-                saved_opts.on_change(saved_opts.layouts[changed_default_zero_indexed + 1])
-            end
-            if changed_default_zero_indexed ~= nil then
+        autocmd_id = vim.api.nvim_create_augroup("LangPicker", {})
+        vim.api.nvim_create_autocmd({ "InsertEnter" }, {
+            group = autocmd_id,
+            desc = "Hyprland-Lang-Picker Changing language in InsertMode",
+            pattern = "*",
+            callback = function(_)
+                if saved_opts.on_enter then
+                    saved_opts.on_enter(saved_opts.layouts[zero_idx_keymap + 1])
+                end
+                if saved_opts.on_change then
+                    saved_opts.on_change(saved_opts.layouts[zero_idx_keymap + 1])
+                end
                 async.run(function()
-                    funcs.change_layout(changed_default_zero_indexed, saved_opts.keyboards)
+                    funcs.change_layout(zero_idx_keymap, saved_opts.keyboards)
                 end)
-            elseif saved_opts.default_layout == 1 then
-                async.run(function()
-                    funcs.to_default()
-                end)
-            else
-                async.run(function()
-                    funcs.change_layout(saved_opts.default_layout - 1, saved_opts.keyboards)
-                end)
-            end
-        end,
-    })
+            end,
+        })
+        vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+            group = autocmd_id,
+            desc = "Hyprland-Lang-Picker Changing language back to default when leaving insert mode",
+            pattern = "*",
+            callback = function(_)
+                if changed_default_zero_indexed ~= nil then
+                    async.run(function()
+                        funcs.change_layout(changed_default_zero_indexed, saved_opts.keyboards)
+                    end)
+                    if saved_opts.on_exit then
+                        saved_opts.on_exit(saved_opts.layouts[changed_default_zero_indexed + 1])
+                    end
+                    if saved_opts.on_change then
+                        saved_opts.on_change(saved_opts.layouts[changed_default_zero_indexed + 1])
+                    end
+                else
+                    if saved_opts.default_layout == 1 then
+                        async.run(function()
+                            funcs.to_default()
+                        end)
+                    else
+                        async.run(function()
+                            funcs.change_layout(saved_opts.default_layout - 1, saved_opts.keyboards)
+                        end)
+                    end
+                    if saved_opts.on_exit then
+                        saved_opts.on_exit(saved_opts.layouts[saved_opts.default_layout - 1])
+                    end
+                    if saved_opts.on_change then
+                        saved_opts.on_change(saved_opts.layouts[saved_opts.default_layout - 1])
+                    end
+                end
+            end,
+        })
+    end)
     if saved_opts.cache_layouts then
         async.run(function()
             setting_up_layouts:send()
@@ -202,18 +208,19 @@ end
 --- Temporarily change the keymap when outside of insert mode.
 ---@param keymap integer | string | nil Value of Keymap to use. If integer, then select from 1-indexed array of layouts. If string, use said layout string. If nil, then it will use vim.ui.select
 function M.set_default(keymap)
-    changed_default_zero_indexed = get_keymap_id(keymap, "Set Temporary Other Default")
+    keymap_awaitable = get_keymap_id(keymap, "Set Temporary Other Default")
+    async.run(function()
+        local possible_keymap = keymap_awaitable()
+        if possible_keymap == -1 then
+            return
+        end
+        changed_default_zero_indexed = possible_keymap
+    end)
 end
 --- Reload layouts without changing cache_status (This function works if layouts aren't cached, but only makes sense if they are)
 function M.reload_layouts()
-    setting_up_layouts:recv()
     async.run(function()
         saved_opts.layouts = funcs:get_layouts()
     end)
-    if saved_opts.cache_layouts then
-        async.run(function()
-            setting_up_layouts:send()
-        end)
-    end
 end
 return M
