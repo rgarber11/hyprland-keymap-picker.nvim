@@ -121,7 +121,7 @@ local function get_layout_description(layout, variant)
             ::continue::
         end
     end
-    if variant == nil then
+    if variant == nil or variant == "" then
         return saved_layouts[layout]
     else
         return saved_variants[layout][variant]
