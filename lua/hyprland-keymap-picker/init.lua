@@ -8,7 +8,7 @@
 --- @field on_enter fun(new_keymap: string)? Function to be called on entering insert mode.
 --- @field on_exit fun(new_keymap: string)? Function to be called on exiting insert mode.
 local async = require "plenary.async"
-local funcs = require "funcs"
+local funcs = require "hyprland-keymap-picker.funcs"
 local M = {}
 local setting_up_layouts, done_setup_layouts = async.control.channel.counter()
 local setting_up_devices, done_setup_devices = async.control.channel.counter()

@@ -1,6 +1,6 @@
 local async = require "plenary.async"
 local Job = require "plenary.job"
-local hyprctl = require "hyprctl"
+local hyprctl = require "hyprland-keymap-picker.hyprctl"
 local M = {}
 --- @class Keyboard
 --- @field address string
