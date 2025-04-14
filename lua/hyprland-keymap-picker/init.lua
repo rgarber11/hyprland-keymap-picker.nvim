@@ -104,7 +104,7 @@ local function get_keymap_id(keymap, prompt)
             end
         else
             vim.ui.select(saved_opts.layouts, { prompt = prompt, kind = "idx" }, function(_, idx)
-                if idx == -1 then
+                if idx == nil then
                     tx(-1)
                 end
                 tx(idx - 1)
