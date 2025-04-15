@@ -1,6 +1,6 @@
 # Hyprland-Keymap-Picker.nvim
 
-WIP Plugin to automatically change layouts when switching to and from insert mode in Hyprland.
+Automatically change layouts when switching to and from insert mode in Hyprland.
 
 ## Current Installation
 
@@ -18,7 +18,7 @@ WIP Plugin to automatically change layouts when switching to and from insert mod
 }
 ```
 
-## Proposed API:
+## API:
 
 ### Setup
 
@@ -50,7 +50,9 @@ require("hyprland-keymap-picker").setup({
     end,
 })
 ```
+
 ### Lua Functions
+
 ```lua
 --- Set insert-mode keymap programmatically
 --- @param keymap int | string | nil 1-indexed hyprland keymap id or "name" of keymap (as in hyprctl devices). If nil, then a selection menu will be used.
@@ -75,7 +77,5 @@ require("hyprland-keymap-picker").reload_layouts()
 
 ## TODO
 
-1. Actually create the top-level module/interface
-2. Performance tuning. Should the `setup({})` call be blocking or non-blocking?
-3. Testing suite + general setup to be more in-line with other Neovim plugins.
-4. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named.
+1. Testing suite + general setup to be more in-line with other Neovim plugins.
+2. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named.
