@@ -97,17 +97,24 @@ local function get_keymap_id(keymap, prompt)
         if type(keymap) == "number" then
             tx(keymap - 1)
         elseif type(keymap) == "string" then
-            for i, layout_name in ipairs(saved_opts.layouts) do
+            for i, layout_name in pairs(saved_opts.layouts) do
                 if layout_name == keymap then
                     tx(i - 1)
                 end
             end
         else
-            vim.ui.select(saved_opts.layouts, { prompt = prompt, kind = "idx" }, function(_, idx)
+            local converter = {}
+            local layout_array = {}
+            for i, v in pairs(saved_opts.layouts) do
+                table.insert(converter, i)
+                table.insert(layout_array, v)
+            end
+            vim.ui.select(layout_array, { prompt = prompt, kind = "idx" }, function(_, idx)
                 if idx == nil then
                     tx(-1)
+                else
+                    tx(converter[idx] - 1)
                 end
-                tx(idx - 1)
             end)
         end
     end)
