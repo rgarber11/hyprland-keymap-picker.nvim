@@ -79,3 +79,4 @@ require("hyprland-keymap-picker").reload_layouts()
 
 1. Testing suite + general setup to be more in-line with other Neovim plugins.
 2. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named.
+3. I read xkbmap layout descriptions from `/usr/share/X11/xkb/rules/evdev.lst`. Is this valid on all distros? Should this be exposed as a setting? How does this work on e.g. NixOS?
