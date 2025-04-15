@@ -25,6 +25,7 @@ function M.setup(opts)
         opts.default_layout = 1
     end
     saved_opts.default_layout = opts.default_layout
+    saved_opts.gave_custom_layouts = false
     if opts.cache_devices == nil then
         opts.cache_devices = true
     end
@@ -44,6 +45,7 @@ function M.setup(opts)
     end
     if opts.layouts ~= nil then
         saved_opts.layouts = opts.layouts
+        saved_opts.gave_custom_layouts = true
         saved_opts.cache_layouts = true -- If you list layouts, that might as well be caching
         async.run(function()
             setting_up_layouts:send()
@@ -105,9 +107,16 @@ local function get_keymap_id(keymap, prompt)
         else
             local converter = {}
             local layout_array = {}
-            for i, v in pairs(saved_opts.layouts) do
-                table.insert(converter, i)
-                table.insert(layout_array, v)
+            if saved_opts.gave_custom_layouts then
+                for i, v in pairs(saved_opts.layouts) do
+                    table.insert(converter, i)
+                    table.insert(layout_array, v)
+                end
+            else
+                for i, v in ipairs(saved_opts.layouts) do
+                    table.insert(converter, i)
+                    table.insert(layout_array, v)
+                end
             end
             vim.ui.select(layout_array, { prompt = prompt, kind = "idx" }, function(_, idx)
                 if idx == nil then
