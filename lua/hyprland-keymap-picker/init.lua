@@ -156,11 +156,15 @@ function M.set_keymap(keymap)
         if zero_idx_keymap == -1 then
             return
         end
-        autocmd_id = vim.api.nvim_create_augroup("LangPicker", {})
+        if autocmd_id == nil then
+            autocmd_id = vim.api.nvim_create_augroup("LangPicker", { clear = false })
+        else
+            vim.api.nvim_clear_autocmds({ group = autocmd_id, buffer = 0 })
+        end
         vim.api.nvim_create_autocmd({ "InsertEnter" }, {
             group = autocmd_id,
+            buffer = 0,
             desc = "Hyprland-Lang-Picker Changing language in InsertMode",
-            pattern = "*",
             callback = function(_)
                 if saved_opts.on_enter then
                     saved_opts.on_enter(saved_opts.layouts[zero_idx_keymap + 1])
@@ -175,8 +179,8 @@ function M.set_keymap(keymap)
         })
         vim.api.nvim_create_autocmd({ "InsertLeave" }, {
             group = autocmd_id,
+            buffer = 0,
             desc = "Hyprland-Lang-Picker Changing language back to default when leaving insert mode",
-            pattern = "*",
             callback = function(_)
                 if changed_default_zero_indexed ~= nil then
                     async.run(function()
@@ -222,7 +226,7 @@ end
 --- Turn of insert-mode keymap changes
 function M.reset()
     assert(autocmd_id, "Autocommands not set")
-    vim.api.nvim_del_augroup_by_id(autocmd_id)
+    vim.api.nvim_clear_autocmds({ group = autocmd_id, buffer = 0 })
     autocmd_id = nil
     changed_default_zero_indexed = nil
 end
