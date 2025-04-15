@@ -22,7 +22,7 @@ local saved_variants = nil
 function M.to_default()
     async.util.block_on(function()
         hyprctl "switchxkblayout all 0"
-    end)()
+    end)
 end
 --- @async
 --- Asynchronously return all keyboards. Errors if none found

@@ -193,9 +193,7 @@ function M.set_keymap(keymap)
                     end
                 else
                     if saved_opts.default_layout == 1 then
-                        async.run(function()
-                            funcs.to_default()
-                        end)
+                        funcs.to_default()
                     else
                         async.run(function()
                             funcs.change_layout(saved_opts.default_layout - 1, saved_opts.keyboards)
