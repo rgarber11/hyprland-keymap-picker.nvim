@@ -89,7 +89,11 @@ local function get_layout_description(layout, variant)
         saved_layouts = {}
         saved_variants = {}
         local state = parse_states.pre_layout
-        for line in io.lines "/usr/share/X11/xkb/rules/evdev.lst" do
+        local xkb_rules = io.open("/usr/share/X11/xkb/rules/evdev.lst", "r")
+        if xkb_rules == nil then
+            return ""
+        end
+        for line in xkb_rules:lines() do
             if state == parse_states.pre_layout then
                 if string.find(line, "! layout") then
                     state = parse_states.layout
@@ -120,6 +124,7 @@ local function get_layout_description(layout, variant)
             end
             ::continue::
         end
+        xkb_rules:close()
     end
     if variant == nil or variant == "" then
         return saved_layouts[layout]
