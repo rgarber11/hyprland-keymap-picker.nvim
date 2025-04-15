@@ -20,7 +20,7 @@ local saved_layouts = nil
 local saved_variants = nil
 --- Synchronous call to switch to default keymap Note: 'switchxkblayout all' only works for the default keymap on my machine
 function M.to_default()
-    async.void(function()
+    async.util.block_on(function()
         hyprctl "switchxkblayout all 0"
     end)()
 end
