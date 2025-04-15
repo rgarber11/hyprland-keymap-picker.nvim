@@ -88,7 +88,6 @@ function M.setup(opts)
         M.reload_layouts()
     end, { desc = "Reload Cached Layouts with new layouts" })
 end
---- @async
 --- Return zero-indexed keymap for given input.
 ---@param keymap integer|string|nil
 ---@param prompt string
