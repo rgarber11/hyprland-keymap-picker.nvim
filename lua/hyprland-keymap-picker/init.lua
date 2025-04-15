@@ -233,7 +233,7 @@ end
 --- Temporarily change the keymap when outside of insert mode.
 ---@param keymap integer | string | nil Value of Keymap to use. If integer, then select from 1-indexed array of layouts. If string, use said layout string. If nil, then it will use vim.ui.select
 function M.set_default(keymap)
-    keymap_awaitable = get_keymap_id(keymap, "Set Temporary Other Default")
+    local keymap_awaitable = get_keymap_id(keymap, "Set Temporary Other Default")
     async.run(function()
         local possible_keymap = keymap_awaitable()
         if possible_keymap == -1 then
