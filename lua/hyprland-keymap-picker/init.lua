@@ -224,7 +224,6 @@ end
 function M.reset()
     assert(autocmd_id, "Autocommands not set")
     vim.api.nvim_clear_autocmds({ group = autocmd_id, buffer = 0 })
-    autocmd_id = nil
     changed_default_zero_indexed = nil
 end
 --- Temporarily change the keymap when outside of insert mode.

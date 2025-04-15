@@ -79,3 +79,4 @@ require("hyprland-keymap-picker").reload_layouts()
 
 1. Testing suite + general setup to be more in-line with other Neovim plugins.
 2. General consistency: Make sure the Lua API is 1-indexed, ensure things are correctly named.
+3. Currently, changing the normal-mode Keymap affects all buffers. Maybe make it buffer-speciic?
