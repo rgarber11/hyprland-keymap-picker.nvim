@@ -95,37 +95,41 @@ end
 ---@return integer
 local function get_keymap_id(keymap, prompt)
     local tx, rx = async.control.channel.oneshot()
-    async.run(function()
-        if type(keymap) == "number" then
-            tx(keymap - 1)
-        elseif type(keymap) == "string" then
-            for i, layout_name in pairs(saved_opts.layouts) do
-                if layout_name == keymap then
-                    tx(i - 1)
-                end
+    async.util.block_on(function()
+        done_setup_layouts.recv()
+    end)
+    if type(keymap) == "number" then
+        tx(keymap - 1)
+    elseif type(keymap) == "string" then
+        for i, layout_name in pairs(saved_opts.layouts) do
+            if layout_name == keymap then
+                tx(i - 1)
+            end
+        end
+    else
+        local converter = {}
+        local layout_array = {}
+        if saved_opts.gave_custom_layouts then
+            for i, v in pairs(saved_opts.layouts) do
+                table.insert(converter, i)
+                table.insert(layout_array, v)
             end
         else
-            local converter = {}
-            local layout_array = {}
-            if saved_opts.gave_custom_layouts then
-                for i, v in pairs(saved_opts.layouts) do
-                    table.insert(converter, i)
-                    table.insert(layout_array, v)
-                end
-            else
-                for i, v in ipairs(saved_opts.layouts) do
-                    table.insert(converter, i)
-                    table.insert(layout_array, v)
-                end
+            for i, v in ipairs(saved_opts.layouts) do
+                table.insert(converter, i)
+                table.insert(layout_array, v)
             end
-            vim.ui.select(layout_array, { prompt = prompt, kind = "idx" }, function(_, idx)
-                if idx == nil then
-                    tx(-1)
-                else
-                    tx(converter[idx] - 1)
-                end
-            end)
         end
+        vim.ui.select(layout_array, { prompt = prompt, kind = "idx" }, function(_, idx)
+            if idx == nil then
+                tx(-1)
+            else
+                tx(converter[idx] - 1)
+            end
+        end)
+    end
+    async.run(function()
+        setting_up_layouts:send()
     end)
     return rx
 end
@@ -138,16 +142,16 @@ function M.set_keymap(keymap)
             setting_up_layouts:send()
         end)
     end
-    done_setup_layouts.recv()
     if not saved_opts.cache_devices then
         async.run(function()
             saved_opts.keyboards = funcs.get_keyboards()
             setting_up_devices:send()
         end)
     end
-    done_setup_devices.recv()
     local keymap_awaitable = get_keymap_id(keymap, "Pick the Insert-Mode Keymap")
     async.run(function()
+        done_setup_layouts.recv()
+        done_setup_devices.recv()
         local zero_idx_keymap = keymap_awaitable()
         if zero_idx_keymap == -1 then
             return
@@ -237,7 +241,9 @@ end
 --- Reload layouts without changing cache_status (This function works if layouts aren't cached, but only makes sense if they are)
 function M.reload_layouts()
     async.run(function()
-        saved_opts.layouts = funcs:get_layouts()
+        done_setup_layouts.recv()
+        saved_opts.layouts = funcs.get_layouts()
+        setting_up_layouts:send()
     end)
 end
 return M
