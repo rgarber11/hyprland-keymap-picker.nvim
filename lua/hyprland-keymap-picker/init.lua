@@ -76,7 +76,9 @@ function M.setup(opts)
             setting_up_devices:send()
         end)
     end
-    augroup_id = vim.api.nvim_create_augroup("LangPicker", { clear = false })
+    if augroup_id == nil then
+        augroup_id = vim.api.nvim_create_augroup("LangPicker", { clear = false })
+    end
     vim.api.nvim_create_user_command("HyprlandSetKeymap", function()
         M.set_keymap()
     end, { desc = "Set insert-mode language, and enable changing keymaps on entering and exiting insert mode" })
@@ -192,17 +194,13 @@ function M.set_keymap(keymap)
                 end
             end,
         })
-    end)
-    if saved_opts.cache_layouts then
-        async.run(function()
+        if saved_opts.cache_layouts then
             setting_up_layouts:send()
-        end)
-    end
-    if saved_opts.cache_devices then
-        async.run(function()
+        end
+        if saved_opts.cache_devices then
             setting_up_devices:send()
-        end)
-    end
+        end
+    end)
 end
 --- Turn of insert-mode keymap changes
 function M.reset()

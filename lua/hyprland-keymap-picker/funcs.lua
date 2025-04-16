@@ -102,7 +102,6 @@ local function get_layout_description(layout, variant)
                 if string.find(line, "! variant") then
                     state = parse_states.variants
                 elseif string.find(line, "^%s*$") then
-                    goto continue
                 else
                     local layout_name, layout_desc = string.match(line, "^%s*(%l+)%s+(.+)$")
                     saved_layouts[layout_name] = layout_desc
@@ -111,7 +110,6 @@ local function get_layout_description(layout, variant)
                 if string.find(line, "! option") then
                     state = parse_states.done
                 elseif string.find(line, "^%s*$") then
-                    goto continue
                 else
                     local variant_name, layout_name, variant_desc = string.match(line, "^%s*(%S+)%s+(%l+):%s+(.+)$")
                     if saved_variants[layout_name] == nil then
@@ -122,7 +120,6 @@ local function get_layout_description(layout, variant)
             else
                 break
             end
-            ::continue::
         end
         xkb_rules:close()
     end
