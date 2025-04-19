@@ -83,13 +83,16 @@ local parse_states = {
 --- Returns Human-readable name for given XKB Layout/Variant combination.
 ---@param layout string Xkb Layout
 ---@param variant string? Variant for given xkblayout
+---@param rules_file string? path to .lst xkbmap file
 ---@return string description X11 description given in evdev.lst for the given xkbmap.
-local function get_layout_description(layout, variant)
+local function get_layout_description(layout, variant, rules_file)
+    rules_file = rules_file or "/usr/share/X11/xkb/rules/evdev.lst"
+    rules_file = vim.fn.expand(rules_file)
     if saved_layouts == nil then
         saved_layouts = {}
         saved_variants = {}
         local state = parse_states.pre_layout
-        local xkb_rules = io.open("/usr/share/X11/xkb/rules/evdev.lst", "r")
+        local xkb_rules = io.open(rules_file, "r")
         if xkb_rules == nil then
             return ""
         end
@@ -131,8 +134,9 @@ local function get_layout_description(layout, variant)
 end
 --- @async
 --- Get Human Readable descriptions for all Hyprland Keyboard Layouts.
+---@param rules_file string? path to xkbmap .lst file
 ---@return string[] layouts
-function M.get_layouts()
+function M.get_layouts(rules_file)
     local layoutStr = hyprctl("j/getoption input:kb_layout")["str"]
     local variantJSON = hyprctl "j/getoption input:kb_variant"
     local variantStr = ""
@@ -150,7 +154,7 @@ function M.get_layouts()
     local descriptions = {}
     for i, layout in ipairs(layouts) do
         if layout ~= "" then
-            table.insert(descriptions, get_layout_description(layout, variants[i]))
+            table.insert(descriptions, get_layout_description(layout, variants[i], rules_file))
         end
     end
     return descriptions

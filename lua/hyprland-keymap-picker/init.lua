@@ -1,5 +1,6 @@
 --- @class HyprlandKeymapOpts
 --- @field default_layout integer? 1-indexed default layout. (Ordering based on Hyprland config) (Default: 1)
+--- @field rules_file string? Path to xkbmap .lst file (Default: /usr/share/X11/xkb/rules/evdev.lst)
 --- @field cache_devices boolean? If a keyboard array isn't given, should devices be checked every change. (Default: true)
 --- @field cache_layouts boolean? Get layout descriptions once during setup, or before every call (Default: true)
 --- @field layouts string[]? Set layouts without calling into Hyprland config. Note that the layout index be a 1-indexed version of the Hyprland Config index.
@@ -44,6 +45,10 @@ function M.setup(opts)
     if opts.on_exit ~= nil then
         saved_opts.on_exit = opts.on_exit
     end
+    saved_opts.rules_file = "/usr/share/X11/xkb/rules/evdev.lst"
+    if opts.rules_file ~= nil then
+        saved_opts.rules_file = opts.rules_file
+    end
     if opts.layouts ~= nil then
         saved_opts.layouts = opts.layouts
         saved_opts.gave_custom_layouts = true
@@ -53,7 +58,7 @@ function M.setup(opts)
         end)
     elseif opts.cache_layouts then
         async.run(function()
-            saved_opts.layouts = funcs.get_layouts()
+            saved_opts.layouts = funcs.get_layouts(saved_opts.rules_file)
             setting_up_layouts:send()
         end)
     end
@@ -141,7 +146,7 @@ end
 function M.set_keymap(keymap)
     if not saved_opts.cache_layouts then
         async.run(function()
-            saved_opts.layouts = funcs.get_layouts()
+            saved_opts.layouts = funcs.get_layouts(saved_opts.rules_file)
             setting_up_layouts:send()
         end)
     end
@@ -224,7 +229,7 @@ end
 function M.reload_layouts()
     async.run(function()
         done_setup_layouts.recv()
-        saved_opts.layouts = funcs.get_layouts()
+        saved_opts.layouts = funcs.get_layouts(saved_opts.rules_file)
         setting_up_layouts:send()
     end)
 end
