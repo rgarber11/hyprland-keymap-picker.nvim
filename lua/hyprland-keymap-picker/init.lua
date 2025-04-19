@@ -47,7 +47,7 @@ function M.setup(opts)
     end
     saved_opts.rules_file = "/usr/share/X11/xkb/rules/evdev.lst"
     if opts.rules_file ~= nil then
-        saved_opts.rules_file = opts.rules_file
+        saved_opts.rules_file = vim.fn.expand(opts.rules_file)
     end
     if opts.layouts ~= nil then
         saved_opts.layouts = opts.layouts

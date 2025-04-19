@@ -83,11 +83,9 @@ local parse_states = {
 --- Returns Human-readable name for given XKB Layout/Variant combination.
 ---@param layout string Xkb Layout
 ---@param variant string? Variant for given xkblayout
----@param rules_file string? path to .lst xkbmap file
+---@param rules_file string path to .lst xkbmap file
 ---@return string description X11 description given in evdev.lst for the given xkbmap.
 local function get_layout_description(layout, variant, rules_file)
-    rules_file = rules_file or "/usr/share/X11/xkb/rules/evdev.lst"
-    rules_file = vim.fn.expand(rules_file)
     if saved_layouts == nil then
         saved_layouts = {}
         saved_variants = {}
@@ -134,7 +132,7 @@ local function get_layout_description(layout, variant, rules_file)
 end
 --- @async
 --- Get Human Readable descriptions for all Hyprland Keyboard Layouts.
----@param rules_file string? path to xkbmap .lst file
+---@param rules_file string path to xkbmap .lst file
 ---@return string[] layouts
 function M.get_layouts(rules_file)
     local layoutStr = hyprctl("j/getoption input:kb_layout")["str"]
