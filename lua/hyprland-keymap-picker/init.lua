@@ -233,4 +233,8 @@ function M.reload_layouts()
         setting_up_layouts:send()
     end)
 end
+-- Gain access to internal global options, for diagnostics
+function M.access_opts()
+    return saved_opts
+end
 return M
