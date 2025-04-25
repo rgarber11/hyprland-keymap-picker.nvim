@@ -116,6 +116,8 @@ local function get_keymap_id(keymap, prompt)
     end)
     if type(keymap) == "number" then
         tx(keymap - 1)
+    elseif tonumber(keymap) ~= nil then
+        tx(tonumber(keymap) - 1)
     elseif type(keymap) == "string" then
         for i, layout_name in pairs(saved_opts.layouts) do
             if layout_name == keymap then
